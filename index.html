@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KDP-Ready Book Maker</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+</head>
+<body>
+
+<nav class="no-print">
+    <div class="logo-area"><strong>KDP-Ready</strong> 6×9</div>
+    <div class="tabs">
+        <button onclick="showTab('metadata')">Book Info</button>
+        <button onclick="showTab('cover')">Cover Editor</button>
+        <button onclick="showTab('manuscript')">Manuscript</button>
+        <button onclick="showTab('author')">Author Bio</button>
+        <button onclick="showTab('export')" class="export-tab">Export Files</button>
+    </div>
+    <div class="global-stats">Total: <span id="total-words">0</span> words</div>
+</nav>
+
+<main class="no-print">
+    <section id="tab-metadata" class="tab-content">
+        <h2>1. General Book Information</h2>
+        <div class="input-grid">
+            <div class="field"><label>Title</label><input type="text" id="m-title" oninput="update('metadata','title',this.value)"></div>
+            <div class="field"><label>Subtitle</label><input type="text" id="m-subtitle" oninput="update('metadata','subtitle',this.value)"></div>
+            <div class="field"><label>Author</label><input type="text" id="m-author" oninput="update('metadata','author',this.value)"></div>
+            <div class="field"><label>Copyright Year</label><input type="text" id="m-year" oninput="update('metadata','copyrightYear',this.value)"></div>
+            <div class="field"><label>ISBN</label><input type="text" id="m-isbn" oninput="update('metadata','isbn',this.value)"></div>
+        </div>
+        <div class="front-matter-box">
+            <h3>Front Matter</h3>
+            <label>Optional Dedication Page</label>
+            <div id="editor-dedication" class="editor" contenteditable="true" oninput="update('','dedicationHtml',this.innerHTML)"></div>
+        </div>
+    </section>
+
+    <section id="tab-cover" class="tab-content" style="display:none">
+        <h2>2. Cover Design (6×9 Spread)</h2>
+        <p class="hint">Upload a 12.125" x 9.25" image for full wrap, or use the fields below.</p>
+        <input type="file" accept="image/*" onchange="loadCoverImg(this)">
+        <div class="cover-spread-container">
+            <div class="cover-canvas" id="cover-canvas">
+                <div class="pane back">
+                    <textarea placeholder="Back cover blurb (Synopsis)..." oninput="update('cover','backText',this.value)"></textarea>
+                </div>
+                <div class="pane spine">
+                    <div id="spine-text">BOOK TITLE &bull; AUTHOR</div>
+                </div>
+                <div class="pane front">
+                    <h1 id="front-t">TITLE</h1>
+                    <h3 id="front-s">Subtitle</h3>
+                    <p id="front-a">Author Name</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="tab-manuscript" class="tab-content" style="display:none">
+        <div class="ms-layout">
+            <div class="ms-sidebar">
+                <h3>Chapters</h3>
+                <div id="chapter-nav"></div>
+                <button class="btn-add" onclick="addNewChapter()">+ New Chapter</button>
+            </div>
+            <div class="ms-editor">
+                <div class="ms-header">
+                    <input type="text" id="ch-title-input" oninput="syncChTitle()">
+                    <span id="ch-word-count">0 words</span>
+                </div>
+                <div class="toolbar">
+                    <button onclick="exec('bold')">B</button>
+                    <button onclick="exec('italic')">I</button>
+                    <button onclick="exec('formatBlock','H1')">H1</button>
+                    <button onclick="exec('formatBlock','H2')">H2</button>
+                    <button onclick="exec('insertUnorderedList')">&bull; List</button>
+                    <button onclick="exec('formatBlock','blockquote')">Quote</button>
+                </div>
+                <div id="main-editor" class="editor" contenteditable="true" oninput="saveCurrentChapter()"></div>
+            </div>
+        </div>
+    </section>
+
+    <section id="tab-author" class="tab-content" style="display:none">
+        <h2>About the Author</h2>
+        <div id="editor-author" class="editor" contenteditable="true" oninput="update('','aboutAuthorHtml',this.innerHTML)"></div>
+    </section>
+
+    <section id="tab-export" class="tab-content" style="display:none">
+        <h2>Final Export</h2>
+        <div class="export-cards">
+            <div class="card">
+                <h3>Paperback (PDF)</h3>
+                <p>6×9 format with mirrored gutters. Set "Margins: None" in Print Settings.</p>
+                <button onclick="exportPDF()">Generate Print PDF</button>
+            </div>
+            <div class="card">
+                <h3>Kindle (EPUB)</h3>
+                <p>Standard reflowable EPUB file ready for KDP upload.</p>
+                <button onclick="exportEPUB()">Download EPUB</button>
+            </div>
+        </div>
+    </section>
+</main>
+
+<div id="print-mount" class="print-only"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
