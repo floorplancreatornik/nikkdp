@@ -1,157 +1,183 @@
-let book = JSON.parse(localStorage.getItem('kdp_ultimate_data')) || {
-    metadata: { title: 'Untitled Book', subtitle: '', author: 'Author Name', copyrightYear: '2025', isbn: '' },
-    cover: { backText: '', image: null },
-    dedicationHtml: '',
-    aboutAuthorHtml: '',
-    chapters: [{ id: 1, title: 'Chapter One', html: '<p>Start writing...</p>' }],
-    activeId: 1
-};
+let projects = JSON.parse(localStorage.getItem('kdp_projects')) || {};
+let activeProjectId = localStorage.getItem('kdp_active_id') || null;
+let book = projects[activeProjectId] || null;
 
-function showTab(t) {
-    document.querySelectorAll('.tab-content').forEach(s => s.style.display='none');
-    document.getElementById(`tab-${t}`).style.display='block';
-    if(t === 'manuscript') renderChapterList();
+// PROJECT MANAGEMENT
+function createNewProject() {
+    const id = 'p_' + Date.now();
+    const title = prompt("Book Title:", "New Book");
+    if (!title) return;
+    projects[id] = {
+        id,
+        metadata: { title: title, author: '', copyrightYear: '2025', isbn: '' },
+        cover: { backText: '', image: null },
+        chapters: [{ id: 1, title: 'Chapter 1', html: '' }],
+        activeId: 1,
+        dedicationHtml: '',
+        aboutAuthorHtml: ''
+    };
+    saveAndSwitch(id);
 }
 
-function update(cat, f, v) {
-    if(cat) book[cat][f] = v; else book[f] = v;
-    syncUI();
-    save();
+function saveAndSwitch(id) {
+    activeProjectId = id;
+    book = projects[id];
+    localStorage.setItem('kdp_projects', JSON.stringify(projects));
+    localStorage.setItem('kdp_active_id', id);
+    renderProjectList();
+    loadActiveProject();
 }
 
-function syncUI() {
-    document.getElementById('front-t').innerText = book.metadata.title || 'TITLE';
-    document.getElementById('front-s').innerText = book.metadata.subtitle;
-    document.getElementById('front-a').innerText = book.metadata.author;
-    document.getElementById('spine-text').innerText = `${book.metadata.title} • ${book.metadata.author}`;
-    if(book.cover.image) document.getElementById('cover-canvas').style.backgroundImage = `url(${book.cover.image})`;
-    
-    // Fill inputs
+function loadActiveProject() {
+    if (!book) { showTab('projects'); return; }
+    document.getElementById('active-project-name').innerText = book.metadata.title;
     document.getElementById('m-title').value = book.metadata.title;
     document.getElementById('m-author').value = book.metadata.author;
-    
-    calculateGlobalWordCount();
+    document.getElementById('editor-dedication').innerHTML = book.dedicationHtml;
+    sync();
+    loadCh();
 }
 
-function renderChapterList() {
-    const container = document.getElementById('chapter-nav');
-    container.innerHTML = '';
-    book.chapters.forEach(ch => {
-        const d = document.createElement('div');
-        d.className = `chapter-item ${ch.id === book.activeId ? 'active' : ''}`;
-        d.innerText = ch.title;
-        d.onclick = () => loadChapter(ch.id);
-        container.appendChild(d);
+function renderProjectList() {
+    const list = document.getElementById('project-list');
+    list.innerHTML = '';
+    Object.values(projects).forEach(p => {
+        const card = document.createElement('div');
+        card.className = `project-card ${p.id === activeProjectId ? 'active' : ''}`;
+        card.innerHTML = `<strong>${p.metadata.title}</strong><br><small>${p.metadata.author || 'No Author'}</small>
+                          <button class="del-btn" onclick="deleteProject('${p.id}', event)">X</button>`;
+        card.onclick = () => saveAndSwitch(p.id);
+        list.appendChild(card);
     });
 }
 
-function loadChapter(id) {
-    saveCurrentChapter();
-    book.activeId = id;
-    const ch = book.chapters.find(c => c.id === id);
-    document.getElementById('ch-title-input').value = ch.title;
-    document.getElementById('main-editor').innerHTML = ch.html;
-    renderChapterList();
-    calculateGlobalWordCount();
-}
-
-function saveCurrentChapter() {
-    const ch = book.chapters.find(c => c.id === book.activeId);
-    if(ch) {
-        ch.title = document.getElementById('ch-title-input').value;
-        ch.html = document.getElementById('main-editor').innerHTML;
-        save();
-        calculateGlobalWordCount();
+function deleteProject(id, e) {
+    e.stopPropagation();
+    if (confirm("Delete this project?")) {
+        delete projects[id];
+        if (activeProjectId === id) activeProjectId = null;
+        saveAndSwitch(Object.keys(projects)[0] || null);
     }
 }
 
-function calculateGlobalWordCount() {
-    let total = 0;
-    book.chapters.forEach(ch => {
-        const txt = ch.html.replace(/<[^>]*>/g, ' ').trim();
-        const count = txt ? txt.split(/\s+/).length : 0;
-        total += count;
-        if(ch.id === book.activeId) document.getElementById('ch-word-count').innerText = `${count} words`;
-    });
-    document.getElementById('total-words').innerText = total.toLocaleString();
-}
-
-function addNewChapter() {
-    const id = Date.now();
-    book.chapters.push({ id, title: `Chapter ${book.chapters.length + 1}`, html: '' });
-    loadChapter(id);
-}
-
-function syncChTitle() {
-    const val = document.getElementById('ch-title-input').value;
-    const ch = book.chapters.find(c => c.id === book.activeId);
-    ch.title = val;
-    renderChapterList();
-}
-
-function exec(c, v=null) { document.execCommand(c, false, v); }
-
-function loadCoverImg(input) {
-    const r = new FileReader();
-    r.onload = e => { update('cover', 'image', e.target.result); syncUI(); };
-    r.readAsDataURL(input.files[0]);
-}
-
-function save() { localStorage.setItem('kdp_ultimate_data', JSON.stringify(book)); }
-
-// EXPORT PRINT PDF
-function exportPDF() {
-    saveCurrentChapter();
-    const mount = document.getElementById('print-mount');
-    mount.innerHTML = '';
-
-    // 1. Title Page
-    mount.innerHTML += `<div class="page"><h1>${book.metadata.title}</h1><h3 style="text-align:center">${book.metadata.subtitle}</h3><p style="text-align:center; margin-top:3in">${book.metadata.author}</p></div>`;
-    
-    // 2. Copyright
-    mount.innerHTML += `<div class="page" style="display:flex; align-items:flex-end"><div><p>© ${book.metadata.copyrightYear} ${book.metadata.author}</p><p>ISBN: ${book.metadata.isbn}</p></div></div>`;
-
-    // 3. Dedication
-    if(book.dedicationHtml) mount.innerHTML += `<div class="page" style="text-align:center; padding-top:2in"><em>${book.dedicationHtml}</em></div>`;
-
-    // 4. Auto-Generated TOC
-    let toc = `<div class="page"><h2>Contents</h2><div style="margin-top:0.5in">`;
-    book.chapters.forEach((ch, i) => { toc += `<div class="toc-entry"><span>${ch.title}</span><span>${i + 5}</span></div>`; });
-    mount.innerHTML += toc + `</div></div>`;
-
-    // 5. Chapters
-    book.chapters.forEach((ch, i) => {
-        mount.innerHTML += `<div class="page"><h2>${ch.title}</h2>${ch.html}<div class="page-num">${i + 5}</div></div>`;
-    });
-
-    // 6. About Author
-    mount.innerHTML += `<div class="page"><h2>About the Author</h2>${book.aboutAuthorHtml}</div>`;
-
-    window.print();
-}
-
-// EXPORT EPUB
-async function exportEPUB() {
-    const zip = new JSZip();
-    zip.file("mimetype", "application/epub+zip", { compression: "STORE" });
-    const oebps = zip.folder("OEBPS");
-    let manifest = '', spine = '';
-
-    book.chapters.forEach((ch, i) => {
-        const name = `ch${i}.xhtml`;
-        oebps.file(name, `<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml"><head><title>${ch.title}</title></head><body><h1>${ch.title}</h1>${ch.html}</body></html>`);
-        manifest += `<item id="c${i}" href="${name}" media-type="application/xhtml+xml"/>\n`;
-        spine += `<itemref idref="c${i}"/>\n`;
-    });
-
-    oebps.file("content.opf", `<?xml version="1.0" encoding="UTF-8"?><package xmlns="http://www.idpf.org/2007/opf" version="2.0"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/"><dc:title>${book.metadata.title}</dc:title><dc:creator>${book.metadata.author}</dc:creator></metadata><manifest>${manifest}</manifest><spine>${spine}</spine></package>`);
-    zip.folder("META-INF").file("container.xml", `<?xml version="1.0"?><container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container"><rootfiles><rootfile full-path="OEBPS/content.opf" media-type="application/oebps-package+xml"/></rootfiles></container>`);
-
-    const blob = await zip.generateAsync({type:"blob"});
+// IMPORT / EXPORT PROJECT FILE
+function exportProjectFile() {
+    const dataStr = JSON.stringify(book);
+    const blob = new Blob([dataStr], {type: "application/json"});
+    const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `${book.metadata.title}.epub`;
+    a.href = url;
+    a.download = `${book.metadata.title}.kdp`;
     a.click();
 }
 
-syncUI();
+function importProject(input) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const imported = JSON.parse(e.target.result);
+        projects[imported.id] = imported;
+        saveAndSwitch(imported.id);
+    };
+    reader.readAsText(input.files[0]);
+}
+
+// EDITOR CORE
+function showTab(n) {
+    document.querySelectorAll('.tab-content').forEach(t => t.style.display='none');
+    document.getElementById(`tab-${n}`).style.display='block';
+    if(n === 'projects') renderProjectList();
+}
+
+function update(cat, f, v) {
+    if(!book) return;
+    if(cat) book[cat][f] = v; else book[f] = v;
+    sync();
+}
+
+function sync() {
+    if(!book) return;
+    document.getElementById('ft-t').innerText = book.metadata.title;
+    document.getElementById('ft-a').innerText = book.metadata.author;
+    document.getElementById('sp-txt').innerText = book.metadata.title;
+    if(book.cover.image) document.getElementById('cv-bg').style.backgroundImage = `url(${book.cover.image})`;
+    localStorage.setItem('kdp_projects', JSON.stringify(projects));
+    calcStats();
+}
+
+function loadCh() {
+    const ch = book.chapters.find(x => x.id === book.activeId);
+    document.getElementById('ch-title').value = ch.title;
+    document.getElementById('main-editor').innerHTML = ch.html;
+    renderChList();
+}
+
+function saveCh() {
+    const ch = book.chapters.find(x => x.id === book.activeId);
+    ch.title = document.getElementById('ch-title').value;
+    ch.html = document.getElementById('main-editor').innerHTML;
+    sync();
+}
+
+function renderChList() {
+    const list = document.getElementById('ch-list');
+    list.innerHTML = '';
+    book.chapters.forEach(c => {
+        const d = document.createElement('div');
+        d.className = `ch-item ${c.id === book.activeId ? 'active' : ''}`;
+        d.innerText = c.title;
+        d.onclick = () => { saveCh(); book.activeId = c.id; loadCh(); };
+        list.appendChild(d);
+    });
+}
+
+function addCh() {
+    const id = Date.now();
+    book.chapters.push({id, title: 'New Chapter', html: ''});
+    saveCh(); book.activeId = id; loadCh();
+}
+
+function calcStats() {
+    let total = 0;
+    book.chapters.forEach(c => {
+        const txt = c.html.replace(/<[^>]*>/g, ' ').trim();
+        const count = txt ? txt.split(/\s+/).length : 0;
+        total += count;
+        if(c.id === book.activeId) document.getElementById('ch-count').innerText = count + ' words';
+    });
+    document.getElementById('total-words').innerText = total;
+}
+
+// EXPORTS
+function exportPDF() {
+    saveCh();
+    const area = document.getElementById('print-area');
+    area.innerHTML = '';
+    area.innerHTML += `<div class="page"><h1>${book.metadata.title}</h1><p style="text-align:center">${book.metadata.author}</p></div>`;
+    book.chapters.forEach(c => {
+        area.innerHTML += `<div class="page"><h2>${c.title}</h2>${c.html}</div>`;
+    });
+    window.print();
+}
+
+async function exportEPUB() {
+    const zip = new JSZip();
+    zip.file("mimetype", "application/epub+zip");
+    const o = zip.folder("OEBPS");
+    book.chapters.forEach((c, i) => o.file(`c${i}.xhtml`, `<html><body><h1>${c.title}</h1>${c.html}</body></html>`));
+    const blob = await zip.generateAsync({type:"blob"});
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `${book.metadata.title}.epub`;
+    link.click();
+}
+
+function loadImg(i) {
+    const r = new FileReader();
+    r.onload = e => { update('cover','image',e.target.result); };
+    r.readAsDataURL(i.files[0]);
+}
+
+function cmd(c, v=null) { document.execCommand(c, false, v); }
+
+// INIT
+if(activeProjectId) loadActiveProject(); else showTab('projects');
