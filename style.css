@@ -1,95 +1,39 @@
-:root { --blue: #2563eb; --bg: #f8fafc; --panel: #ffffff; --text: #0f172a; --border: #e2e8f0; --active: #000000; }
-body.dark-mode { --bg: #0f172a; --panel: #1e293b; --text: #f8fafc; --border: #334155; --active: #ffffff; }
+:root { --blue: #2563eb; --bg: #f8fafc; --panel: #ffffff; --text: #0f172a; --border: #e2e8f0; }
+body.dark-mode { --bg: #0f172a; --panel: #1e293b; --text: #f8fafc; --border: #334155; }
 
-body { font-family: 'Inter', sans-serif; margin: 0; background: var(--bg); color: var(--text); }
-.no-print { display: block; }
-.print-only { display: none; }
+body { font-family: system-ui, sans-serif; margin: 0; background: var(--bg); color: var(--text); }
 
-/* Global Editors & Typography */
-.editor, .editor-mini { 
-    direction: ltr !important; unicode-bidi: isolate !important; text-align: left; 
-    background: #fff; color: #000; padding: 40px; border: 1px solid var(--border); outline: none;
-    line-height: 1.7; font-size: 12pt;
+/* MOBILE RESPONSIVE NAV */
+nav { background: #000; color: #fff; padding: 10px; position: sticky; top: 0; z-index: 1000; }
+.nav-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.tabs { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; }
+.tabs button { 
+    background: #334155; border: none; color: white; padding: 8px 12px; 
+    font-size: 0.75rem; border-radius: 4px; cursor: pointer; flex: 1 1 auto;
 }
-.editor { min-height: 500px; font-family: "Georgia", serif; }
-.editor-mini { min-height: 120px; padding: 15px; border-radius: 8px; }
+.tabs button.active-tab { background: var(--blue); font-weight: bold; }
 
-/* Navigation & Tabs */
-nav { background: #000; color: #fff; display: flex; align-items: center; padding: 0 20px; height: 60px; justify-content: space-between; position: sticky; top: 0; z-index: 1000; }
-.tabs button { background: none; border: none; color: #94a3b8; cursor: pointer; padding: 15px 8px; font-weight: 600; font-size: 0.8rem; }
-.tabs button.active-tab { color: #fff; border-bottom: 3px solid var(--blue); }
-
-/* Toolbar */
-.toolbar { background: var(--panel); padding: 10px; border-bottom: 1px solid var(--border); display: flex; gap: 8px; align-items: center; }
-.toolbar button { border: 1px solid var(--border); background: var(--panel); color: var(--text); padding: 6px 10px; border-radius: 4px; font-weight: bold; cursor: pointer; }
-.toolbar button.active { background: var(--active) !important; color: var(--bg) !important; }
-.ocr-btn { background: var(--blue); color: white; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; }
-.status-msg { font-size: 0.7rem; color: var(--blue); font-weight: bold; margin-left: 10px; }
-
-/* Details Tab */
-.grid-form { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
-.keyword-grid, .category-select-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 15px; }
-.keyword-grid input, .category-select-grid select { padding: 8px; border: 1px solid var(--border); border-radius: 4px; background: var(--bg); color: var(--text); }
-
-/* Manuscript Layout */
-.ms-layout { display: flex; gap: 20px; margin-top: 10px; }
-.side-nav { width: 200px; border-right: 1px solid var(--border); padding-right: 15px; }
-.sortable-list { list-style: none; padding: 0; margin-top: 10px; }
-.ch-item { padding: 8px; cursor: grab; border-radius: 4px; margin-bottom: 2px; background: var(--bg); border: 1px solid var(--border); }
-.ch-item.active { background: var(--active) !important; color: var(--bg) !important; border-color: var(--active) !important; }
-.sortable-ghost { opacity: 0.4; background-color: #f0f0f0; }
-
-/* Cover Tab */
-.cover-canvas { display: flex; background: #1e293b; margin: 30px auto; border: 2px solid #000; width: fit-content; position: relative; }
-.pane { width: 300px; height: 450px; padding: 20px; box-sizing: border-box; color: #fff; position: relative; overflow: hidden; }
-.pane.front img { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; z-index: 1; }
-.pane.front h1, .pane.front p { z-index: 2; position: relative; text-align: center; }
-.pane-spine { width: 20px; writing-mode: vertical-rl; text-align: center; border: 1px solid rgba(255,255,255,0.1); color: #fff; font-size: 0.7rem; display: flex; align-items: center; justify-content: center; }
-.barcode-area { background: #fff; width: 100px; height: 50px; position: absolute; bottom: 20px; right: 20px; color: #333; font-size: 0.6rem; display: flex; align-items: center; justify-content: center; border: 1px dashed #ccc; }
-.warning { color: #e54; font-size: 0.9em; margin-top: 10px; }
-
-/* Rights & Price */
-.royalty-box { background: #eff6ff; padding: 20px; border-radius: 12px; border: 1px solid #bfdbfe; color: #1e3a8a; margin: 20px 0; }
-
-/* Export & Preview */
-.pdf-preview-area { margin-top: 30px; border: 1px solid var(--border); min-height: 400px; background: #eee; }
-.print-page { 
-    width: 6in; height: 9in; padding: 0.75in 0.7in 0.75in 0.85in; box-sizing: border-box; 
-    border: 1px solid #ccc; background: #fff; margin: 10px auto; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    overflow: hidden; /* For images that bleed */
+/* EDITOR */
+.editor { 
+    background: #fff; color: #000; padding: 20px; border: 1px solid var(--border); 
+    min-height: 300px; outline: none; font-family: serif; line-height: 1.6;
+    direction: ltr !important; text-align: left;
 }
-.print-page.even { padding: 0.75in 0.85in 0.75in 0.7in; }
-.print-page img { max-width: 100%; height: auto; display: block; margin: 0 auto; } /* Images within print preview */
-.print-page.bleed-enabled { padding: 0; }
-.print-page.bleed-enabled img { width: 100%; height: 100%; object-fit: cover; margin: 0; }
+.editor-mini { background: #fff; color: #000; padding: 15px; border: 1px solid var(--border); min-height: 100px; }
 
+/* LAYOUT */
+.ms-layout { display: flex; flex-direction: column; gap: 15px; padding: 10px; }
+@media (min-width: 768px) { .ms-layout { flex-direction: row; } .side-nav { width: 200px; } }
 
-/* PRINT LOGIC: Gutters for PDF export */
+.project-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; padding: 15px; }
+.project-card { background: var(--panel); border: 2px solid var(--border); padding: 15px; border-radius: 8px; text-align: center; }
+
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px; background: var(--panel); padding: 10px; border-bottom: 1px solid var(--border); }
+.tool-btn { background: var(--blue); color: white; padding: 5px 10px; border-radius: 4px; font-size: 0.8rem; cursor: pointer; }
+
+/* PRINTING */
 @media print {
-    .no-print { display: none !important; }
-    .print-only { display: block !important; }
-    @page { size: 6in 9in; margin: 0; }
-    .page { 
-        width: 6in; height: 9in; 
-        box-sizing: border-box; page-break-after: always; text-align: justify; font-family: "Georgia", serif; background: #fff; color: #000;
-        /* Default for odd pages */
-        padding: 0.75in 0.7in 0.75in 0.85in; 
-    }
-    .page.even { 
-        padding: 0.75in 0.85in 0.75in 0.7in; /* Swap gutter for even pages */
-    }
-    .page h1, .page h2, .page h3 { text-align: center; }
-    .page h1 { font-size: 2.2em; margin-top: 2in; }
-    .page h2 { font-size: 1.6em; margin-top: 1in; page-break-before: always; }
-    .page p { text-indent: 1.5em; margin-bottom: 0.5em; }
-    .page p:first-of-type { text-indent: 0; } /* No indent for first paragraph */
-    .page.title-page { text-align: center; display: flex; flex-direction: column; justify-content: center; }
-    .page.dedication-page { text-align: center; font-style: italic; display: flex; flex-direction: column; justify-content: center; }
-    .page.toc-page h2 { page-break-before: unset; }
-    .page.toc-page ul { list-style: none; padding: 0; }
-    .page.toc-page li { margin-bottom: 0.5em; }
-
-    /* Bleed specific styles for print */
-    .page.bleed-enabled { padding: 0; }
-    .page.bleed-enabled img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .no-print { display: none; }
+    .print-only { display: block; }
+    .page { width: 6in; height: 9in; padding: 1in; page-break-after: always; background: white; color: black; }
 }
