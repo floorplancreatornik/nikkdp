@@ -2,19 +2,40 @@ let projects = JSON.parse(localStorage.getItem('kdp_projects')) || {};
 let activeProjectId = localStorage.getItem('kdp_active_id') || null;
 let book = projects[activeProjectId] || null;
 
-// PROJECT MANAGEMENT
+// TAB MANAGEMENT
+function showTab(n) {
+    document.querySelectorAll('.tab-content').forEach(t => t.style.display='none');
+    document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active-tab'));
+    
+    document.getElementById(`tab-${n}`).style.display='block';
+    const btn = document.getElementById(`btn-tab-${n}`);
+    if(btn) btn.classList.add('active-tab');
+    
+    if(n === 'projects') renderProjectList();
+}
+
+// FORMATTING STATE CHECKER
+function checkFormat() {
+    const bold = document.queryCommandState('bold');
+    const italic = document.queryCommandState('italic');
+    document.getElementById('btn-bold').classList.toggle('active', bold);
+    document.getElementById('btn-italic').classList.toggle('active', italic);
+}
+
+// Listener to update buttons when clicking/typing
+document.getElementById('main-editor').addEventListener('keyup', checkFormat);
+document.getElementById('main-editor').addEventListener('mouseup', checkFormat);
+
+// PROJECT LOGIC
 function createNewProject() {
     const id = 'p_' + Date.now();
     const title = prompt("Book Title:", "New Book");
     if (!title) return;
     projects[id] = {
-        id,
-        metadata: { title: title, author: '', copyrightYear: '2025', isbn: '' },
+        id, metadata: { title: title, author: '', copyrightYear: '2025', isbn: '' },
         cover: { backText: '', image: null },
         chapters: [{ id: 1, title: 'Chapter 1', html: '' }],
-        activeId: 1,
-        dedicationHtml: '',
-        aboutAuthorHtml: ''
+        activeId: 1, dedicationHtml: '', aboutAuthorHtml: ''
     };
     saveAndSwitch(id);
 }
@@ -60,34 +81,7 @@ function deleteProject(id, e) {
     }
 }
 
-// IMPORT / EXPORT PROJECT FILE
-function exportProjectFile() {
-    const dataStr = JSON.stringify(book);
-    const blob = new Blob([dataStr], {type: "application/json"});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${book.metadata.title}.kdp`;
-    a.click();
-}
-
-function importProject(input) {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        const imported = JSON.parse(e.target.result);
-        projects[imported.id] = imported;
-        saveAndSwitch(imported.id);
-    };
-    reader.readAsText(input.files[0]);
-}
-
 // EDITOR CORE
-function showTab(n) {
-    document.querySelectorAll('.tab-content').forEach(t => t.style.display='none');
-    document.getElementById(`tab-${n}`).style.display='block';
-    if(n === 'projects') renderProjectList();
-}
-
 function update(cat, f, v) {
     if(!book) return;
     if(cat) book[cat][f] = v; else book[f] = v;
@@ -124,7 +118,7 @@ function renderChList() {
     book.chapters.forEach(c => {
         const d = document.createElement('div');
         d.className = `ch-item ${c.id === book.activeId ? 'active' : ''}`;
-        d.innerText = c.title;
+        d.innerText = c.title || 'Untitled Chapter';
         d.onclick = () => { saveCh(); book.activeId = c.id; loadCh(); };
         list.appendChild(d);
     });
@@ -171,13 +165,35 @@ async function exportEPUB() {
     link.click();
 }
 
+function exportProjectFile() {
+    const blob = new Blob([JSON.stringify(book)], {type: "application/json"});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `${book.metadata.title}.kdp`;
+    a.click();
+}
+
+function importProject(input) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const imported = JSON.parse(e.target.result);
+        projects[imported.id] = imported;
+        saveAndSwitch(imported.id);
+    };
+    reader.readAsText(input.files[0]);
+}
+
 function loadImg(i) {
     const r = new FileReader();
     r.onload = e => { update('cover','image',e.target.result); };
     r.readAsDataURL(i.files[0]);
 }
 
-function cmd(c, v=null) { document.execCommand(c, false, v); }
+function cmd(c, v=null) { 
+    document.execCommand(c, false, v); 
+    checkFormat();
+    document.getElementById('main-editor').focus();
+}
 
 // INIT
 if(activeProjectId) loadActiveProject(); else showTab('projects');
