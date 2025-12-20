@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>KDP-Ready Book Maker PRO</title>
+    <title>KDP-Ready Book Maker PRO (V4)</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </head>
@@ -11,10 +11,10 @@
 <nav class="no-print">
     <div class="logo">KDP-PRO</div>
     <div class="tabs">
-        <button onclick="showTab('projects')">📁 Projects</button>
-        <button onclick="showTab('metadata')">1. Info</button>
-        <button onclick="showTab('cover')">2. Cover</button>
-        <button onclick="showTab('chapters')">3. Manuscript</button>
+        <button id="btn-tab-projects" onclick="showTab('projects')">📁 Projects</button>
+        <button id="btn-tab-metadata" onclick="showTab('metadata')">1. Info</button>
+        <button id="btn-tab-cover" onclick="showTab('cover')">2. Cover</button>
+        <button id="btn-tab-chapters" onclick="showTab('chapters')">3. Manuscript</button>
         <button onclick="showTab('export')" class="btn-highlight">4. Export</button>
     </div>
     <div class="stats">Project: <span id="active-project-name">None</span> | <span id="total-words">0</span> words</div>
@@ -34,10 +34,10 @@
     <section id="tab-metadata" class="tab-content" style="display:none">
         <h2>Book Metadata</h2>
         <div class="grid-form">
-            <input type="text" id="m-title" placeholder="Title" oninput="update('metadata','title',this.value)">
-            <input type="text" id="m-author" placeholder="Author" oninput="update('metadata','author',this.value)">
-            <input type="text" id="m-year" placeholder="Copyright Year" oninput="update('metadata','copyrightYear',this.value)">
-            <input type="text" id="m-isbn" placeholder="ISBN" oninput="update('metadata','isbn',this.value)">
+            <div class="f-group"><label>Title</label><input type="text" id="m-title" oninput="update('metadata','title',this.value)"></div>
+            <div class="f-group"><label>Author</label><input type="text" id="m-author" oninput="update('metadata','author',this.value)"></div>
+            <div class="f-group"><label>Year</label><input type="text" id="m-year" oninput="update('metadata','copyrightYear',this.value)"></div>
+            <div class="f-group"><label>ISBN</label><input type="text" id="m-isbn" oninput="update('metadata','isbn',this.value)"></div>
         </div>
         <h3>Dedication</h3>
         <div id="editor-dedication" class="editor" contenteditable="true" oninput="update('','dedicationHtml',this.innerHTML)"></div>
@@ -61,13 +61,19 @@
             </div>
             <div class="editor-body">
                 <div class="ch-header">
-                    <input type="text" id="ch-title" oninput="syncCh()">
+                    <input type="text" id="ch-title" placeholder="Chapter Title..." oninput="syncCh()">
                     <span id="ch-count">0 words</span>
                 </div>
-                <div class="toolbar">
-                    <button onclick="cmd('bold')">B</button>
-                    <button onclick="cmd('italic')">I</button>
+                <div class="toolbar" id="main-toolbar">
+                    <button id="btn-bold" title="Bold" onclick="cmd('bold')">B</button>
+                    <button id="btn-italic" title="Italic" onclick="cmd('italic')">I</button>
+                    <span class="sep">|</span>
                     <button onclick="cmd('formatBlock','H1')">H1</button>
+                    <button onclick="cmd('formatBlock','H2')">H2</button>
+                    <button onclick="cmd('formatBlock','H3')">H3</button>
+                    <button onclick="cmd('formatBlock','p')">Text</button>
+                    <span class="sep">|</span>
+                    <button onclick="cmd('insertUnorderedList')">• List</button>
                     <button onclick="cmd('formatBlock','blockquote')">Quote</button>
                 </div>
                 <div id="main-editor" class="editor" contenteditable="true" oninput="saveCh()"></div>
@@ -78,25 +84,13 @@
     <section id="tab-export" class="tab-content" style="display:none">
         <h2>Export & Backup</h2>
         <div class="export-grid">
-            <div class="card">
-                <h3>Backup Project</h3>
-                <p>Download your raw project file to continue on another computer.</p>
-                <button onclick="exportProjectFile()">Download .KDP Project</button>
-            </div>
-            <div class="card">
-                <h3>Print Ready (PDF)</h3>
-                <button onclick="exportPDF()">Export 6x9 PDF</button>
-            </div>
-            <div class="card">
-                <h3>Digital (EPUB)</h3>
-                <button onclick="exportEPUB()">Export Kindle EPUB</button>
-            </div>
+            <div class="card"><h3>Backup</h3><button onclick="exportProjectFile()">Download .KDP</button></div>
+            <div class="card"><h3>Paperback</h3><button onclick="exportPDF()">Export 6x9 PDF</button></div>
+            <div class="card"><h3>Kindle</h3><button onclick="exportEPUB()">Export EPUB</button></div>
         </div>
     </section>
 </main>
-
 <div id="print-area" class="print-only"></div>
-
 <script src="app.js"></script>
 </body>
 </html>
