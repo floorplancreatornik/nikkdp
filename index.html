@@ -3,119 +3,136 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KDP-PRO Master Suite (Final Rev)</title>
+    <title>KDP-PRO Master Suite: Omniscient</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
 </head>
 <body class="light-mode">
 
 <nav class="no-print">
     <div class="nav-left">
-        <div class="logo">KDP-PRO MASTER</div>
-        <button id="theme-toggle" onclick="toggleTheme()" title="Toggle Dark/Light Mode">🌓</button>
+        <div class="logo">KDP-PRO OMNISCIENT</div>
+        <button id="theme-toggle" onclick="toggleTheme()">🌓</button>
     </div>
-    <div class="tabs" id="nav-tabs">
-        <button id="btn-tab-projects" onclick="showTab('projects')">📁 Projects</button>
-        <button id="btn-tab-front" onclick="showTab('front')">1. Front Matter</button>
-        <button id="btn-tab-chapters" onclick="showTab('chapters')">2. Manuscript</button>
-        <button id="btn-tab-back" onclick="showTab('back')">3. Back Matter</button>
-        <button id="btn-tab-cover" onclick="showTab('cover')">4. Cover</button>
-        <button id="btn-tab-export" class="finish-btn" onclick="showTab('export')">5. Finish</button>
+    <div class="tabs">
+        <button id="btn-tab-projects" onclick="showTab('projects')">📁 Library</button>
+        <button id="btn-tab-details" onclick="showTab('details')">1. Details</button>
+        <button id="btn-tab-content" onclick="showTab('content')">2. Content</button>
+        <button id="btn-tab-cover" onclick="showTab('cover')">3. Cover</button>
+        <button id="btn-tab-rights" onclick="showTab('rights')">4. Rights & Price</button>
+        <button id="btn-tab-export" class="finish-btn" onclick="showTab('export')">🚀 Export</button>
     </div>
 </nav>
 
 <main class="no-print">
-    <div class="toolbar" id="global-toolbar" style="display:none;">
-        <button id="btn-bold" onclick="cmd('bold')" title="Bold">B</button>
-        <button id="btn-italic" onclick="cmd('italic')" title="Italic">I</button>
-        <button id="btn-underline" onclick="cmd('underline')" title="Underline">U</button>
-        <button id="btn-strikeThrough" onclick="cmd('strikeThrough')" title="Strikethrough">S</button>
-        <span class="sep">|</span>
-        <button id="btn-h1" onclick="cmd('formatBlock','H1')">H1</button>
-        <button id="btn-h2" onclick="cmd('formatBlock','H2')">H2</button>
-        <button id="btn-p" onclick="cmd('formatBlock','P')">Text</button>
-        <span class="sep">|</span>
-        <button id="btn-blockquote" onclick="cmd('formatBlock','blockquote')" title="Quote">“ ”</button>
-        <button id="btn-insertUnorderedList" onclick="cmd('insertUnorderedList')" title="List">• List</button>
-    </div>
-
-    <section id="tab-projects" class="tab-content">
-        <div class="section-header">
-            <h2>Book Library</h2>
-            <div class="project-controls">
-                <button onclick="createNewProject()" class="action-btn-primary">➕ New Book</button>
-                <input type="file" id="import-file" style="display:none" onchange="importProject(this)">
-                <button onclick="document.getElementById('import-file').click()" class="action-btn">📥 Import .KDP</button>
-            </div>
-        </div>
-        <div id="project-list" class="project-grid"></div>
-    </section>
-
-    <section id="tab-front" class="tab-content" style="display:none">
-        <h2>1. Front Matter</h2>
+    <section id="tab-details" class="tab-content" style="display:none">
+        <h2>Paperback Details (KDP Page 1)</h2>
         <div class="grid-form">
             <div class="input-wrap"><label>Book Title</label><input type="text" id="m-title" oninput="update('metadata','title',this.value)"></div>
+            <div class="input-wrap"><label>Subtitle</label><input type="text" id="m-subtitle" oninput="update('metadata','subtitle',this.value)"></div>
             <div class="input-wrap"><label>Author</label><input type="text" id="m-author" oninput="update('metadata','author',this.value)"></div>
-            <div class="input-wrap"><label>Copyright Year</label><input type="text" id="m-year" oninput="update('metadata','copyrightYear',this.value)"></div>
-            <div class="input-wrap"><label>ISBN</label><input type="text" id="m-isbn" oninput="update('metadata','isbn',this.value)"></div>
+            <div class="input-wrap"><label>Series Name</label><input type="text" id="m-series" oninput="update('metadata','series',this.value)"></div>
+            <div class="input-wrap"><label>Edition No.</label><input type="number" id="m-edition" oninput="update('metadata','edition',this.value)"></div>
+            <div class="input-wrap"><label>Publisher</label><input type="text" id="m-publisher" oninput="update('metadata','publisher',this.value)"></div>
         </div>
-        <div class="editor-label">Dedication</div>
-        <div id="editor-dedication" class="editor" contenteditable="true" oninput="update('','dedicationHtml',this.innerHTML)"></div>
+        <h3>Description (Amazon Blurb)</h3>
+        <div id="editor-description" class="editor-mini" contenteditable="true" oninput="update('','descriptionHtml',this.innerHTML)"></div>
+        <h3>7 Search Keywords</h3>
+        <div class="keyword-grid" id="keyword-container"></div>
+        <h3>Categories (BISAC)</h3>
+        <div class="category-select-grid" id="category-container"></div>
+        <button class="add-btn" onclick="addCategory()">+ Add Category</button>
+        <div class="toggle-group">
+            <label><input type="checkbox" id="m-adult" onchange="update('metadata','adultContent',this.checked)"> Adult Content</label>
+            <label><input type="checkbox" id="m-lowcontent" onchange="update('metadata','lowContent',this.checked)"> Low Content (Notebook, Journal)</label>
+        </div>
+        <div class="input-wrap"><label>Dedication Page Text</label><div id="editor-dedication" class="editor-mini" contenteditable="true" oninput="update('','dedicationHtml',this.innerHTML)"></div></div>
     </section>
 
-    <section id="tab-chapters" class="tab-content" style="display:none">
+    <section id="tab-content" class="tab-content" style="display:none">
+        <h2>Manuscript Content (KDP Page 2)</h2>
+        <div class="toolbar" id="global-toolbar">
+            <button onclick="cmd('bold')" title="Bold">B</button><button onclick="cmd('italic')" title="Italic">I</button><button onclick="cmd('underline')" title="Underline">U</button>
+            <span class="sep">|</span>
+            <button onclick="cmd('justifyLeft')" title="Align Left">⫷</button><button onclick="cmd('justifyCenter')" title="Center">≣</button><button onclick="cmd('justifyRight')" title="Align Right">⫸</button>
+            <span class="sep">|</span>
+            <button onclick="cmd('formatBlock','H1')">H1</button><button onclick="cmd('formatBlock','P')">Text</button>
+            <span class="sep">|</span>
+            <label class="ocr-btn">📷 Scan Page (OCR) <input type="file" hidden accept="image/*" onchange="runOCR(this)"></label>
+            <label class="ocr-btn">🖼️ Insert Image <input type="file" hidden accept="image/*" onchange="insertImage(this)"></label>
+            <span id="ocr-status" class="status-msg"></span>
+        </div>
         <div class="ms-layout">
             <div class="side-nav">
-                <div id="ch-list"></div>
+                <button class="action-btn-secondary" onclick="generateTOC()">⚡ Auto-Generate TOC</button>
+                <h3>Chapters</h3>
+                <div id="ch-list" class="sortable-list"></div>
                 <button class="add-btn" onclick="addCh()">+ New Chapter</button>
             </div>
             <div class="editor-body">
-                <div class="ch-info">
-                    <input type="text" id="ch-title" class="title-input" placeholder="Untitled Chapter" oninput="saveCh()">
-                    <span id="ch-count">0 words</span>
-                </div>
+                <input type="text" id="ch-title" class="title-input" placeholder="Chapter Title" oninput="saveCh()">
                 <div id="main-editor" class="editor" contenteditable="true" oninput="saveCh()"></div>
             </div>
         </div>
     </section>
 
-    <section id="tab-back" class="tab-content" style="display:none">
-        <h2>3. Back Matter</h2>
-        <div class="editor-label">Afterword / Epilogue</div>
-        <div id="editor-epilogue" class="editor" contenteditable="true" oninput="update('','epilogueHtml',this.innerHTML)"></div>
-        <div class="editor-label">About the Author</div>
-        <div id="editor-author" class="editor" contenteditable="true" oninput="update('','aboutAuthorHtml',this.innerHTML)"></div>
-    </section>
-
     <section id="tab-cover" class="tab-content" style="display:none">
-        <h2>4. Cover Assembly</h2>
+        <h2>Cover & Spine (KDP Page 3: Upload)</h2>
         <div class="cover-settings">
-            <input type="file" onchange="loadImg(this)">
+            <input type="file" onchange="loadCoverImage(this)" accept="image/*">
             <select id="paper-type" onchange="update('metadata','paperType',this.value); calcSpine();">
                 <option value="white">White Paper</option>
                 <option value="cream">Cream Paper</option>
             </select>
-            <span class="spine-info">Spine Width: <b id="spine-val">0.125</b>"</span>
+            <span>Spine Width: <b id="spine-val">0.125</b>"</span>
+            <label><input type="checkbox" id="m-bleed" onchange="update('metadata','hasBleed',this.checked); calcSpine();"> Has Bleed (Images to edge)</label>
         </div>
         <div class="cover-canvas" id="cv-bg">
-            <div class="pane back"><textarea oninput="update('cover','backText',this.value)" id="back-blurb" placeholder="Back cover blurb..."></textarea></div>
+            <div class="pane back">
+                <textarea oninput="update('cover','backText',this.value)" id="back-blurb" placeholder="Back cover blurb..."></textarea>
+                <div class="barcode-area">BARCODE (KDP will add)</div>
+            </div>
             <div id="dynamic-spine" class="pane-spine">SPINE</div>
-            <div class="pane front"><h1 id="ft-t">TITLE</h1><p id="ft-a">AUTHOR</p></div>
+            <div class="pane front">
+                <img id="cover-img-display" src="" alt="Cover Image" style="display:none;">
+                <h1 id="ft-t">TITLE</h1>
+                <p id="ft-a">AUTHOR</p>
+            </div>
+        </div>
+        <p class="warning">Upload a single JPG or PNG for your full cover wrap (front, spine, back). Size: <b id="cover-size">Calculating...</b></p>
+    </section>
+
+    <section id="tab-rights" class="tab-content" style="display:none">
+        <h2>Rights & Pricing (KDP Page 4)</h2>
+        <div class="royalty-box">
+            <div class="input-wrap"><label>List Price ($)</label><input type="number" id="m-price" value="9.99" step="0.01" oninput="calcRoyalty()"></div>
+            <div class="calc-results">
+                <p>Printing Cost: <span id="print-cost">$0.00</span></p>
+                <p>Royalty Rate: <span id="royalty-rate">60%</span></p>
+                <p><strong>Your Profit: <span id="profit-val">$0.00</span></strong></p>
+            </div>
+        </div>
+        <div class="toggle-group">
+            <label><input type="checkbox" id="m-worldwide" onchange="update('metadata','worldwideRights',this.checked)"> Worldwide Rights</label>
+            <label><input type="checkbox" id="m-expanded" onchange="update('metadata','expandedDistribution',this.checked)"> Expanded Distribution</label>
         </div>
     </section>
 
+    <section id="tab-projects" class="tab-content">
+        <div class="section-header"><h2>Your Project Library</h2> <button onclick="createNewProject()" class="action-btn-primary">➕ New Book</button></div>
+        <div id="project-list" class="project-grid"></div>
+    </section>
+
     <section id="tab-export" class="tab-content" style="display:none">
-        <h2>5. Final Production</h2>
+        <h2>Final Production & Preview</h2>
         <div class="export-grid">
-            <button class="export-card" onclick="exportPDF()">
-                <h3>Export Print PDF</h3>
-                <p>Standard 6x9 inch format with mirrored gutters.</p>
-            </button>
-            <button class="export-card" onclick="exportProjectFile()">
-                <h3>Download .KDP Backup</h3>
-                <p>Save all metadata and manuscript files locally.</p>
-            </button>
+            <button class="export-card" onclick="exportPDF()">🖨️ Generate Print PDF (6x9)</button>
+            <button class="export-card" onclick="previewPDF()">👁️‍🗨️ Preview PDF in Browser</button>
+            <button class="export-card" onclick="exportProjectFile()">💾 Download .KDP Project</button>
         </div>
+        <div id="pdf-preview-area" class="pdf-preview-area"></div>
     </section>
 </main>
 <div id="print-area" class="print-only"></div>
