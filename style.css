@@ -1,68 +1,42 @@
-:root { --accent: #2563eb; --bg: #f1f5f9; --text: #0f172a; }
-body { font-family: system-ui, -apple-system, sans-serif; margin: 0; background: var(--bg); color: var(--text); }
+:root { --blue: #2563eb; --bg: #f1f5f9; --gray: #64748b; }
+body { font-family: system-ui, sans-serif; margin: 0; background: var(--bg); }
 .no-print { display: block; }
 .print-only { display: none; }
 
-/* UI Layout */
-nav { background: #000; color: #fff; display: flex; align-items: center; padding: 0 20px; height: 60px; position: sticky; top: 0; z-index: 100; }
-.tabs { flex-grow: 1; display: flex; gap: 10px; margin-left: 30px; }
-.tabs button { background: none; border: none; color: #94a3b8; cursor: pointer; font-weight: 600; padding: 10px; }
-.tabs button:hover { color: #fff; }
-.export-tab { background: var(--accent) !important; color: white !important; border-radius: 4px; }
-.global-stats { font-size: 0.8rem; color: #94a3b8; }
+nav { background: #000; color: #fff; display: flex; align-items: center; padding: 0 20px; height: 60px; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+.tabs button { background: none; border: none; color: #94a3b8; cursor: pointer; padding: 15px; font-weight: 600; }
+.btn-highlight { background: var(--blue) !important; color: #fff !important; }
 
-main { max-width: 1200px; margin: 30px auto; background: #fff; padding: 40px; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); min-height: 80vh; }
-h2 { border-bottom: 2px solid var(--bg); padding-bottom: 10px; }
+main { max-width: 1100px; margin: 30px auto; background: #fff; padding: 40px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); min-height: 80vh; }
+.grid-form { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+input[type="text"] { padding: 10px; border: 1px solid #ddd; border-radius: 4px; width: 100%; box-sizing: border-box; }
 
-/* Forms & Editors */
-.input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
-.field label { display: block; font-size: 0.8rem; font-weight: bold; margin-bottom: 5px; color: var(--gray); }
-input[type="text"] { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
-.editor { border: 1px solid #ddd; min-height: 300px; padding: 25px; font-family: "Georgia", serif; font-size: 11.5pt; line-height: 1.6; outline: none; background: #fff; }
-.toolbar { background: #f8fafc; border: 1px solid #ddd; border-bottom: none; padding: 8px; display: flex; gap: 5px; }
-.toolbar button { cursor: pointer; padding: 4px 12px; border: 1px solid #cbd5e1; background: white; border-radius: 3px; }
+/* Project List */
+.project-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-top: 20px; }
+.project-card { border: 2px solid #e2e8f0; padding: 20px; border-radius: 8px; cursor: pointer; transition: 0.2s; position: relative; }
+.project-card:hover { border-color: var(--blue); }
+.project-card.active { border-color: var(--blue); background: #eff6ff; }
+.del-btn { position: absolute; top: 5px; right: 5px; background: #ef4444; color: #fff; border: none; border-radius: 3px; cursor: pointer; font-size: 10px; }
 
-/* Manuscript Sidebar */
+/* Editor Styles */
+.editor { border: 1px solid #ddd; min-height: 400px; padding: 30px; font-family: "Georgia", serif; font-size: 11.5pt; line-height: 1.6; outline: none; text-align: justify; }
 .ms-layout { display: grid; grid-template-columns: 200px 1fr; gap: 30px; }
-.chapter-item { padding: 10px; border-bottom: 1px solid #f1f5f9; cursor: pointer; font-size: 0.9rem; transition: 0.2s; }
-.chapter-item.active { background: #e0e7ff; color: var(--accent); font-weight: bold; }
-.ms-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-#ch-title-input { border: none; font-size: 1.5rem; font-weight: bold; outline: none; width: 70%; }
+.side-nav { border-right: 1px solid #eee; }
+.ch-item { padding: 10px; border-bottom: 1px solid #f1f5f9; cursor: pointer; }
+.ch-item.active { background: #e0e7ff; font-weight: bold; }
 
-/* Cover Editor */
-.cover-spread-container { overflow-x: auto; padding: 20px 0; }
-.cover-canvas { 
-    display: flex; width: 1000px; height: 450px; background: #334155; border: 1px solid #000; color: white;
-    background-size: cover; background-position: center; margin: 0 auto;
-}
-.pane { padding: 30px; box-sizing: border-box; }
-.back { flex: 1; border-right: 1px solid rgba(255,255,255,0.1); }
-.spine { width: 45px; writing-mode: vertical-rl; text-align: center; border-right: 1px solid rgba(255,255,255,0.1); font-size: 12px; letter-spacing: 1px; }
-.front { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
-.back textarea { width: 100%; height: 100%; background: transparent; color: #fff; border: none; resize: none; font-family: serif; }
+/* Cover Canvas */
+.cover-canvas { display: flex; width: 800px; height: 380px; background: #1e293b; color: #fff; margin: 20px auto; background-size: cover; border: 1px solid #000; }
+.pane { padding: 20px; box-sizing: border-box; }
+.spine { width: 40px; writing-mode: vertical-rl; text-align: center; border-left: 1px solid #555; border-right: 1px solid #555; font-size: 11px; }
 
-/* PRINT CSS: 6x9 ENGINE */
+/* Print Engine */
 @media print {
     .no-print { display: none !important; }
     .print-only { display: block !important; }
     @page { size: 6in 9in; margin: 0; }
-    body { background: white; }
-    
-    .page {
-        width: 6in; height: 9in;
-        padding: 0.75in 0.75in 0.75in 0.875in; /* Default: Gutter Left */
-        box-sizing: border-box;
-        page-break-after: always;
-        font-family: "Georgia", serif;
-        font-size: 11.5pt;
-        text-align: justify;
-        line-height: 1.5;
-        position: relative;
-    }
-    .page:nth-child(even) { padding: 0.75in 0.875in 0.75in 0.75in; } /* Mirrored Gutter */
-    
-    h1 { font-size: 22pt; text-align: center; margin-top: 2in; margin-bottom: 0.5in; }
-    h2 { font-size: 18pt; margin-top: 0.5in; }
-    .page-num { position: absolute; bottom: 0.5in; left: 0; width: 100%; text-align: center; font-size: 10pt; }
-    .toc-entry { display: flex; justify-content: space-between; margin-bottom: 10px; border-bottom: 1px dotted #ccc; }
+    .page { width: 6in; min-height: 9in; padding: 0.75in 0.75in 0.75in 0.875in; box-sizing: border-box; page-break-after: always; font-family: "Georgia", serif; text-align: justify; line-height: 1.5; font-size: 11.5pt; }
+    .page:nth-child(even) { padding: 0.75in 0.875in 0.75in 0.75in; }
+    h1 { text-align: center; margin-top: 2in; }
+    h2 { margin-top: 0.5in; border-bottom: 1px solid #eee; }
 }
