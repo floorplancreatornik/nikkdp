@@ -2,55 +2,50 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>KDP-Ready Book Maker PRO (V4)</title>
+    <title>KDP-PRO: Absolute Final Edition</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </head>
 <body>
 
 <nav class="no-print">
-    <div class="logo">KDP-PRO</div>
+    <div class="logo">KDP-PRO MASTER</div>
     <div class="tabs">
         <button id="btn-tab-projects" onclick="showTab('projects')">📁 Projects</button>
-        <button id="btn-tab-metadata" onclick="showTab('metadata')">1. Info</button>
-        <button id="btn-tab-cover" onclick="showTab('cover')">2. Cover</button>
-        <button id="btn-tab-chapters" onclick="showTab('chapters')">3. Manuscript</button>
-        <button onclick="showTab('export')" class="btn-highlight">4. Export</button>
+        <button id="btn-tab-front" onclick="showTab('front')">1. Front Matter</button>
+        <button id="btn-tab-chapters" onclick="showTab('chapters')">2. Manuscript</button>
+        <button id="btn-tab-back" onclick="showTab('back')">3. Back Matter</button>
+        <button id="btn-tab-cover" onclick="showTab('cover')">4. Cover</button>
+        <button id="btn-tab-export" class="btn-highlight" onclick="showTab('export')">5. Finish</button>
     </div>
-    <div class="stats">Project: <span id="active-project-name">None</span> | <span id="total-words">0</span> words</div>
 </nav>
 
 <main class="no-print">
-    <section id="tab-projects" class="tab-content">
-        <h2>Project Library</h2>
-        <div class="project-controls">
-            <button onclick="createNewProject()" class="btn-add">Create New Book</button>
-            <input type="file" id="import-file" style="display:none" onchange="importProject(this)">
-            <button onclick="document.getElementById('import-file').click()">Import .KDP File</button>
-        </div>
-        <div id="project-list" class="project-grid"></div>
-    </section>
+    <div class="toolbar" id="global-toolbar">
+        <button id="btn-bold" onclick="cmd('bold')">B</button>
+        <button id="btn-italic" onclick="cmd('italic')">I</button>
+        <button id="btn-underline" onclick="cmd('underline')">U</button>
+        <button id="btn-strikeThrough" onclick="cmd('strikeThrough')">S</button>
+        <button id="btn-hiliteColor" onclick="cmd('hiliteColor', 'yellow')">🖍</button>
+        <span class="sep">|</span>
+        <button onclick="cmd('formatBlock','H1')">H1</button>
+        <button onclick="cmd('formatBlock','H2')">H2</button>
+        <button onclick="cmd('formatBlock','P')">Text</button>
+        <span class="sep">|</span>
+        <button id="btn-blockquote" onclick="cmd('formatBlock','blockquote')">“Quote”</button>
+        <button id="btn-insertUnorderedList" onclick="cmd('insertUnorderedList')">• List</button>
+    </div>
 
-    <section id="tab-metadata" class="tab-content" style="display:none">
-        <h2>Book Metadata</h2>
+    <section id="tab-front" class="tab-content" style="display:none">
+        <h2>Front Matter (Prelims)</h2>
         <div class="grid-form">
-            <div class="f-group"><label>Title</label><input type="text" id="m-title" oninput="update('metadata','title',this.value)"></div>
-            <div class="f-group"><label>Author</label><input type="text" id="m-author" oninput="update('metadata','author',this.value)"></div>
-            <div class="f-group"><label>Year</label><input type="text" id="m-year" oninput="update('metadata','copyrightYear',this.value)"></div>
-            <div class="f-group"><label>ISBN</label><input type="text" id="m-isbn" oninput="update('metadata','isbn',this.value)"></div>
+            <input type="text" id="m-title" placeholder="Full Title" oninput="update('metadata','title',this.value)">
+            <input type="text" id="m-author" placeholder="Author Name" oninput="update('metadata','author',this.value)">
+            <input type="text" id="m-year" placeholder="Copyright Year" oninput="update('metadata','copyrightYear',this.value)">
+            <input type="text" id="m-isbn" placeholder="ISBN-13" oninput="update('metadata','isbn',this.value)">
         </div>
-        <h3>Dedication</h3>
+        <div class="editor-label">Dedication Page</div>
         <div id="editor-dedication" class="editor" contenteditable="true" oninput="update('','dedicationHtml',this.innerHTML)"></div>
-    </section>
-
-    <section id="tab-cover" class="tab-content" style="display:none">
-        <h2>Cover Wrap (6×9)</h2>
-        <input type="file" accept="image/*" onchange="loadImg(this)">
-        <div class="cover-canvas" id="cv-bg">
-            <div class="pane back"><textarea oninput="update('cover','backText',this.value)" placeholder="Back blurb..."></textarea></div>
-            <div class="pane spine"><div id="sp-txt">TITLE</div></div>
-            <div class="pane front"><h1 id="ft-t">TITLE</h1><p id="ft-a">AUTHOR</p></div>
-        </div>
     </section>
 
     <section id="tab-chapters" class="tab-content" style="display:none">
@@ -60,36 +55,46 @@
                 <button class="add-btn" onclick="addCh()">+ New Chapter</button>
             </div>
             <div class="editor-body">
-                <div class="ch-header">
-                    <input type="text" id="ch-title" placeholder="Chapter Title..." oninput="syncCh()">
-                    <span id="ch-count">0 words</span>
-                </div>
-                <div class="toolbar" id="main-toolbar">
-                    <button id="btn-bold" title="Bold" onclick="cmd('bold')">B</button>
-                    <button id="btn-italic" title="Italic" onclick="cmd('italic')">I</button>
-                    <span class="sep">|</span>
-                    <button onclick="cmd('formatBlock','H1')">H1</button>
-                    <button onclick="cmd('formatBlock','H2')">H2</button>
-                    <button onclick="cmd('formatBlock','H3')">H3</button>
-                    <button onclick="cmd('formatBlock','p')">Text</button>
-                    <span class="sep">|</span>
-                    <button onclick="cmd('insertUnorderedList')">• List</button>
-                    <button onclick="cmd('formatBlock','blockquote')">Quote</button>
-                </div>
+                <input type="text" id="ch-title" class="title-input" oninput="saveCh()">
                 <div id="main-editor" class="editor" contenteditable="true" oninput="saveCh()"></div>
             </div>
         </div>
     </section>
 
+    <section id="tab-back" class="tab-content" style="display:none">
+        <h2>Back Matter (End Matter)</h2>
+        <div class="editor-label">Afterword / Epilogue</div>
+        <div id="editor-epilogue" class="editor" contenteditable="true" oninput="update('','epilogueHtml',this.innerHTML)"></div>
+        <div class="editor-label">About the Author</div>
+        <div id="editor-author" class="editor" contenteditable="true" oninput="update('','aboutAuthorHtml',this.innerHTML)"></div>
+    </section>
+
+    <section id="tab-cover" class="tab-content" style="display:none">
+        <h2>Wraparound Cover (Automated Spine)</h2>
+        <div class="cover-settings">
+            <input type="file" onchange="loadImg(this)">
+            <select id="paper-type" onchange="update('metadata','paperType',this.value); calcSpine();">
+                <option value="white">White Paper</option>
+                <option value="cream">Cream Paper</option>
+            </select>
+            <span>Spine: <b id="spine-val">0.125</b>"</span>
+        </div>
+        <div class="cover-canvas" id="cv-bg">
+            <div class="pane back"><textarea oninput="update('cover','backText',this.value)" id="back-blurb" placeholder="Back Blurb..."></textarea></div>
+            <div id="dynamic-spine" class="pane spine"><div id="sp-txt">TITLE</div></div>
+            <div class="pane front"><h1 id="ft-t">TITLE</h1><p id="ft-a">AUTHOR</p></div>
+        </div>
+    </section>
+
     <section id="tab-export" class="tab-content" style="display:none">
-        <h2>Export & Backup</h2>
+        <h2>Production Center</h2>
         <div class="export-grid">
-            <div class="card"><h3>Backup</h3><button onclick="exportProjectFile()">Download .KDP</button></div>
-            <div class="card"><h3>Paperback</h3><button onclick="exportPDF()">Export 6x9 PDF</button></div>
-            <div class="card"><h3>Kindle</h3><button onclick="exportEPUB()">Export EPUB</button></div>
+            <button class="card" onclick="exportPDF()">Export Print-Ready PDF (6x9)</button>
+            <button class="card" onclick="exportProjectFile()">Download .KDP Project File</button>
         </div>
     </section>
 </main>
+
 <div id="print-area" class="print-only"></div>
 <script src="app.js"></script>
 </body>
